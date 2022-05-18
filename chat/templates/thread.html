@@ -1,0 +1,69 @@
+{% extends "main_template.html" %}
+{% load crispy_forms_tags %}
+{% block body %}
+<style>
+.tango {
+    background-color: #47a386;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    color: #fff;
+    font-size: 14px;
+    padding: 10px 25px;
+}
+</style>
+
+    <div class="container">
+        <h2>{{ thread.title }}</h2>
+        <p>
+            <span class="mr-4">{{ thread.date }}</span>
+            <!--<a> {{ thread.author }}</a>-->
+        </p>
+    </div>
+    <hr/>
+    <div class="row">
+        <div class="col-1"></div>
+
+        <div class="col-11">
+            <p>
+                {{ thread.content }}
+            </p>
+            <p>
+                <a href="#" class="mr-3">{{ thread.author }}</a>
+                <span>{{ reply_count }} replies</span>
+            </p>
+            <!-- Replies section-->
+            <h3 class="my-2">Replies</h3>
+            {% for reply in reply_list %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p>{{ reply.content }}</p>
+                    <p>
+                        <a href="#" class="mr-2">{{ reply.author }}</a>
+                        <a>{{ reply.date }}</a>
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+                    <!-- Reply Form -->
+            <div class="card">
+                <h6 class="card-header">Post Reply</h6>
+                <div class="card-body">
+                    <form action="/site_spotify/thread/{{ thread.threadID }}" method="post">
+                        {% csrf_token %}
+                        {{ form.errors }}
+                        {{ form.replycontent|as_crispy_field }}
+
+                        <input class="tango" id="close" type='submit' value="submit">
+                    <!--<textarea class="form-control comment-text"></textarea>
+                    <button type=button class="btn btn-dark my-3 save-comment">Submit</button>-->
+                </div>
+            </div>
+            <a href="{% url 'site_spotify:forum' %}">Go Back</a>
+        </div>
+
+    </div>
+    
+
+
+{% endblock %}

@@ -1,6 +1,7 @@
 import mysql.connector
 import uuid
 import chat.credentials as cred
+import bcrypt
 
 conn = mysql.connector.connect(
         host=cred.db_host,
@@ -10,9 +11,17 @@ conn = mysql.connector.connect(
         )
 
 
+def generate_hashpw(pw):
+    '''generates password hash to store'''
+    salt = bcrypt.gensalt()
+    pw = pw.encode()
+    hashed = bcrypt.hashpw(pw, salt)
+
+    return hashed.decode('utf-8')
+
 def generate_sessionId(username):
     '''generates a user sessionId for a new login'''
-    #grab current usernames userID
+    # grab current usernames userID
     query = "SELECT userID from users where uname = %s;"
     val = (username,)
     cursor = conn.cursor()
@@ -21,7 +30,7 @@ def generate_sessionId(username):
     userID = query_result[0][0]
 
     sessionID = uuid.uuid4().hex
-    
+
     # if user has a session, delete it
     query = "DELETE FROM sessions WHERE userID=%s;"
     val = (userID,)
@@ -33,12 +42,12 @@ def generate_sessionId(username):
     val = (userID, sessionID)
     cursor.execute(query, val)
     conn.commit()
-    
+
     return sessionID
 
 
 def process_login(username, password):
-
+    '''check user login credentials against db '''
     query = "SELECT uname, pw FROM users WHERE uname = %s;"
     val = (username,)
     cursor = conn.cursor()
@@ -54,3 +63,28 @@ def process_login(username, password):
     # this is where the hash will be checked using bcrypt
     if username == uname and password == pw:
         return generate_sessionId(username)
+    else:
+        return ''
+
+
+def register_user(username, pw):
+    '''registers new user in db'''
+    hashedpw = generate_hashpw(pw)
+
+    # check if username already exists
+    query = "SELECT userID FROM users WHERE uname = %s;"
+    val = (username,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # create if username doesn't exist
+    if not query_result:
+        query = "INSERT into users (uname, pw) values (%s, %s);"
+        val = (username, hashedpw)
+        cursor.execute(query, val)
+        conn.commit()
+
+        return generate_sessionId(username)
+    else:
+        return ''

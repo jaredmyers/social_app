@@ -21,7 +21,12 @@ app_name = 'chat'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.login, name="login"),
-    path('chome', views.c_home, name="chome"),
     path('index', views.index, name="index"),
     path('register', views.register, name="register"),
+    path('home', views.home, name="home"),
+    path('friendslist', views.friendslist, name="friendslist"),
+    path('forum', views.forum, name="forum"),
+    path('chat', views.chat, name="chat"),
+    path('logout', views.logout, name="logout"),
+    path('thread/<int:id>', views.thread, name="thread"),
 ]
