@@ -2,7 +2,9 @@ from django.shortcuts import render
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
 from .user_processing import process_login, register_user
-from .thread_processing import get_thread_info, send_new_thread, get_reply_page, ThreadMain, ThreadReplies
+from .thread_processing import get_thread_info, send_new_thread
+from .thread_processing import ThreadMain, ThreadReplies
+from .thread_processing import get_reply_page, send_new_reply
 import json
 
 
@@ -114,6 +116,13 @@ def forum(request):
 
 
 def thread(request, id):
+
+    # take in and send new reply to database
+    if request.method == "POST":
+        form = PostReply(request.POST)
+        if form.is_valid():
+            replycontent = form.cleaned_data['replycontent']
+            send_new_reply(request.COOKIES['sessionID'], str(id), replycontent)
 
     # get thread and its replies
     print("id is: " + str(id))

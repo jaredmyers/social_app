@@ -77,7 +77,6 @@ def get_reply_page(threadID):
         thread_json_string += '"date":"'+i[4].strftime('%Y-%m-%d')+'"}'
         thread_json_string += '+'
 
-
     # grab all relevant reply data for the given forum thread
     query = "select users.uname, replies.content, replies.replyts from users,replies where users.userID=replies.userID and replies.threadID=%s order by replies.replyts desc;"
     val = (threadID,)
@@ -93,6 +92,27 @@ def get_reply_page(threadID):
 
     return (thread_json_string + replies_json_string)
 
+def send_new_reply(sessionID, threadID, replycontent):
+    '''create/send new reply on given threadID to database'''
+    # grab the users id
+    query = "select userID from sessions where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # return false if session not vaild
+    if not query_result:
+        return ''
+    userID = query_result[0][0]
+
+    # inserts new reply into replies table
+    query = "insert into replies (threadID, userID, content) values (%s, %s, %s);"
+    val = (threadID, userID, replycontent)
+    cursor.execute(query, val)
+    conn.commit()
+
+    return '1'
 
 class ThreadMain():
 
