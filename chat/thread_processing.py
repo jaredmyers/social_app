@@ -33,15 +33,36 @@ def get_thread_info():
     return json_string
 
 
-def send_new_thread():
-    pass
+def send_new_thread(sessionID, threadname, threadcontent):
+    ''''creates new forum thread'''
+
+    # grab the users userID
+    query = "select userID from sessions where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # returns false if session not valid
+    if not query_result:
+        return ''
+
+    userID = query_result[0][0]
+
+    # inserts new forum post into threads table
+    query = "insert into threads (userID, title, content) values (%s, %s, %s);"
+    val = (userID, threadname, threadcontent)
+    cursor.execute(query, val)
+    conn.commit()
+
+    return '1'
 
 
 def get_reply_page(threadID):
     '''gets replies for a given forum thread for reply page'''
 
     # grab al relevant forum thread information
-    query = "select users.uname, threads.threadID, threads.title, threads.content, threads.ts from users.threads where users.userID=threads.userID and threads.threadID=%s;"
+    query = "select users.uname, threads.threadID, threads.title, threads.content, threads.ts from users,threads where users.userID=threads.userID and threads.threadID=%s;"
     val = (threadID,)
     cursor = conn.cursor()
     cursor.execute(query, val)

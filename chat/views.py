@@ -117,7 +117,7 @@ def thread(request, id):
 
     # get thread and its replies
     print("id is: " + str(id))
-    thread_and_replies = get_reply_page(str(id))
+    thread_and_replies = get_reply_page(id).split('+')
     print("thread_and_replies= ..")
     print(thread_and_replies)
     thread = thread_and_replies[0]
@@ -138,12 +138,12 @@ def thread(request, id):
         object = ThreadReplies(j["author"], j["content"], j["date"])
         reply_list.append(object)
 
-        reply_count = len(reply_list)
+    reply_count = len(reply_list)
 
-        return render(request, "thread.html", {
-            "thread": thread, "reply_list": reply_list, "reply_count": reply_count, "form": PostReply()
-            })
-        
+    return render(request, "thread.html", {
+        "thread": thread, "reply_list": reply_list, "reply_count": reply_count, "form": PostReply()
+        })
+
 
 
 def chat(request):
