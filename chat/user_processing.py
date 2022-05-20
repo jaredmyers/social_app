@@ -58,13 +58,22 @@ def process_login(username, password):
         return ''
 
     uname = query_result[0][0]
-    pw = query_result[0][1]
+    hashed = query_result[0][1]
 
     # this is where the hash will be checked using bcrypt
-    if username == uname and password == pw:
+    cred_match = bcrypt.checkpw(password.encode(), hashed.encode())
+    print("credmatch = ")
+    print(cred_match)
+
+    if cred_match:
         return generate_sessionId(username)
-    else:
-        return ''
+
+    return ''
+
+#    if username == uname and password == pw:
+#        return generate_sessionId(username)
+#    else:
+#        return ''
 
 
 def register_user(username, pw):

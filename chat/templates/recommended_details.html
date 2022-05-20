@@ -425,16 +425,17 @@ body.flat-black {
         font-size: 14px;
         padding: 10px 25px;
 }
-/*.chatbox {
+/*
+.chatbox {
     min-height: 615px;
 }
 */
-p {margin: 0;}
+p {
+    margin: 0;
+    font-size:18px
+}
 </style>
 
-{% if friend_response %}
-<script>alert("Friend Added!.");</script>
-{% endif %}
 
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 <div class="container">
@@ -461,7 +462,7 @@ p {margin: 0;}
                                             <!--- <input class="tango" id="close" type='submit' name="add_trigger" value="Add Friend">
                                            -->
                                         </form>
-                                        <!--<a href="#" class="btn btn-default">Add Friend</a>-->
+                                        
                                  </div>
                             </div>
                         </div>
@@ -470,26 +471,67 @@ p {margin: 0;}
                 {% empty %}
                 <div class="card bg-transparent">
                     <div class="card-body">
-                        <p> No Matches, Connect to Spotify!</p>
+                        <p> No Matches, Sign in!</p>
                     </div>
                 </div>
                {% endfor %}
                 <!-- form to enter friends-->
+                
                 <div class="card bg-transparent border-0">
-                    <div class="card-body">
-                       
-                           
-                        <!--<textarea class="form-control comment-text"></textarea>
-                        <button type=button class="btn btn-dark my-3 save-comment">Submit</button>-->
+                    <div class="card mb-2">
+                        <!--<h6 class="card-header">Top Shared Tracks</h6>-->
+                        <div class="card-body">
+                            <iframe src="{{ details.song_preview }}"width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+
+                        </div>
                     </div>
                 </div>
             </div>
       <div class="col-6">
-        <h3 class="m-t-0 m-b-20">Details on Match:</h3>
-        <div class="card mb-2 chatbox">
+        <h3 class="m-t-0 m-b-20">Details on Match: {{username}} </h3>
+        <div class="card mb-2">
+            <h6 class="card-header">Top Shared Genres</h6>
             <div class="card-body">
-
+                {% for genre in details.mutual_genres %}
+                <p>{{ genre }}</p>
+                {% empty %}
+                <p>No shared genres.</p>
+                {% endfor %}      
             </div>
+        </div>
+        <div class="card mb-2">
+            <h6 class="card-header">Top Shared Artists</h6>
+            <div class="card-body">
+                {% for artist in details.mutual_artists %}
+                <p>{{ artist }}</p>
+                {% empty %}
+                <p>No shared artists. </p>
+                {% endfor %}      
+            </div>
+        </div>
+        <div class="card mb-2">
+            <h6 class="card-header">Top Shared Albums</h6>
+            <div class="card-body">
+                {% for album in details.saved_albums %}
+                <p>{{ album }}</p>
+                {% empty %}
+                <p>No shared albums.</p>
+                {% endfor %}      
+            </div>
+        </div>
+        <div class="card mb-2">
+            <h6 class="card-header">Top Shared Tracks</h6>
+            <div class="card-body">
+                {% for track in details.mutual_tracks %}
+                <p>{{ track }}</p>
+                {% empty %}
+                <p>No shared albums.</p>
+                {% endfor %}    
+            </div>
+        </div>
+
+
+
         </div>
 
       </div>
@@ -499,4 +541,5 @@ p {margin: 0;}
    </div>
 
 </div>
+
 {% endblock %}

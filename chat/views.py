@@ -8,6 +8,10 @@ from .thread_processing import get_reply_page, send_new_reply
 import json
 
 
+def vaidate_session():
+    pass
+
+
 def login(request):
     '''main login page'''
     # validate post info and send to db for validation
@@ -27,7 +31,10 @@ def login(request):
                     })
             else:
                 print("authentication successful")
-                return render(request, "home.html")
+                sessionID = authentication
+                response = render(request, "home.html")
+                response.set_cookie('sessionID', sessionID)
+                return response
         else:
             print("form not valid")
             bad_login = True
@@ -66,7 +73,7 @@ def register(request):
                 if registered:
                     print("user was registered")
                     sessionID = registered
-                    response = render(request, 'index.html')
+                    response = render(request, 'home.html')
                     response.set_cookie('sessionID', sessionID)
                     return response
                 else:
@@ -85,13 +92,15 @@ def home(request):
     return render(request, "home.html")
 
 
-def friendslist(request):
-    return render(request, "friendslist.html")
-
-
 def forum(request):
 
-    # take in and send new thread
+    # --- Connection validation ---
+    # --- making sure user has valid session ---
+    # --- code here
+    # ---
+
+    # validate if post request,
+    # take in and send new thread to threads table
     if request.method == "POST":
         form = PostThread(request.POST)
         if form.is_valid():
@@ -153,6 +162,35 @@ def thread(request, id):
         "thread": thread, "reply_list": reply_list, "reply_count": reply_count, "form": PostReply()
         })
 
+
+def friendslist(request):
+
+    # --- Connection validation ---
+    # --- making sure user has valid session ---
+    # --- code here
+    # ---
+
+    friend_response = False
+    recommended_friends = ['stoopkid', 'kingtut']
+    recommended_num = 2
+
+    print("rendering...")
+
+    return render(request, "friendslist.html", {
+        "recommended_friends": recommended_friends, "recommended_num": recommended_num, "friend_response": friend_response
+        })
+
+def recommended_details(request, username):
+
+    #details = get_details_page(request.COOKIES['sessionID'], username)
+    recommended_friends = ['stoopkid', 'kingtut']
+    recommended_num = len(recommended_friends)
+    friend_response = False
+    details = ['likes long walks on the beach, playing with dogs, candle light dinners', 'appreciates disco and jelly beans']
+
+    return render(request, "recommended_details.html", {
+        "recommended_friends": recommended_friends, "recommended_num": recommended_num, "username": username, "details": details, "friend_response": friend_response
+        })
 
 
 def chat(request):
