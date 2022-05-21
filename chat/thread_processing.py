@@ -115,6 +115,50 @@ def send_new_reply(sessionID, threadID, replycontent):
     return '1'
 
 
+def add_friend(sessionID, username):
+    '''adds friend to users friendlist'''
+
+    # grab current users userID
+    query = "select userID from sessions where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    userID1 = cursor.fetchall()[0][0]
+
+    # grab potential friends userID
+    query = "select userID from users where uname=%s;"
+    val = (username,)
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # returns false is potential friend doesn't exist
+    if not query_result:
+        return ''
+
+    userID2 = query_result[0][0]
+
+    # return false if user tries to friend self
+    if userID1 == userID2:
+        return ''
+
+    # check if they are already friends
+    query = "select * from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+    val = (userID1, userID2, userID2, userID1)
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # returns false if already friends
+    if query_result:
+        return ''
+
+    # add friend relationship to friends table
+    query = "insert into friends (userID1, userID2) values (%s, %s);"
+    val = (userID1, userID2)
+    cursor.execute(query, val)
+    conn.commit()
+
+    return '1'
+
 # Chat page processing
 def get_friends(sessionID):
     '''fetch users friends for their friend list'''

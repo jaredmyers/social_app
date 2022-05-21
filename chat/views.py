@@ -6,7 +6,7 @@ from .user_processing import process_login, register_user
 from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
-from .thread_processing import get_friends
+from .thread_processing import get_friends, add_friend
 import json
 from .api_processing import get_recommended_friends, get_recommended_details
 
@@ -185,8 +185,20 @@ def friendslist(request):
     # --- code here
     # ---
 
-    sessionID = request.COOKIES['sessionID']
+    sessionID = validate_session(request)
     friend_response = False
+
+    # adds friend is users clicks 'add friend'
+    if request.method == 'POST':
+        form = AddFriend(request.POST)
+        print(request.POST)
+        if form.is_valid():
+            print("addfriend form is valid")
+            if 'friendname' in request.POST:
+                friendname = request.POST['friendname']
+                print(friendname)
+                friend_response = add_friend(sessionID, friendname)
+
     recommended_friends = get_recommended_friends(sessionID)
     recommended_num = len(recommended_friends)
 
