@@ -6,6 +6,7 @@ from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
 import json
+from .api_processing import get_recommended_friends, get_recommended_details
 
 
 def vaidate_session():
@@ -170,9 +171,10 @@ def friendslist(request):
     # --- code here
     # ---
 
+    sessionID = request.COOKIES['sessionID']
     friend_response = False
-    recommended_friends = ['stoopkid', 'kingtut']
-    recommended_num = 2
+    recommended_friends = get_recommended_friends(sessionID)
+    recommended_num = len(recommended_friends)
 
     print("rendering...")
 
@@ -180,13 +182,15 @@ def friendslist(request):
         "recommended_friends": recommended_friends, "recommended_num": recommended_num, "friend_response": friend_response
         })
 
+
 def recommended_details(request, username):
 
-    #details = get_details_page(request.COOKIES['sessionID'], username)
-    recommended_friends = ['stoopkid', 'kingtut']
+    sessionID = request.COOKIES['sessionID']
+
+    recommended_friends = get_recommended_friends(sessionID)
     recommended_num = len(recommended_friends)
     friend_response = False
-    details = ['likes long walks on the beach, playing with dogs, candle light dinners', 'appreciates disco and jelly beans']
+    details = get_recommended_details(sessionID, username)
 
     return render(request, "recommended_details.html", {
         "recommended_friends": recommended_friends, "recommended_num": recommended_num, "username": username, "details": details, "friend_response": friend_response

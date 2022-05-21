@@ -454,7 +454,7 @@ p {
                                     <b class="text-inverse"> {{ recommended }}</b>
                                  </div>
                                  <div class="media-body valign-middle text-right overflow-visible">
-                                        <a href="/site_spotify/details/{{ recommended }}" class="btn btn-default">Details</a>
+                                        <a href="/details/{{ recommended }}" class="btn btn-default">Details</a>
                                         <form class="btn btn-default" action="" method="post">
                                             {% csrf_token %}
                                             <input class="tango btn btn-default" type="submit" name="addfriend" value="Add Friend">
@@ -476,13 +476,13 @@ p {
                 </div>
                {% endfor %}
                 <!-- form to enter friends-->
-                
+-                
                 <div class="card bg-transparent border-0">
                     <div class="card mb-2">
-                        <!--<h6 class="card-header">Top Shared Tracks</h6>-->
-                        <div class="card-body">
-                            <iframe src="{{ details.song_preview }}"width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
-
+                        <!--<h6 class="card-header">Top Shared Tracks</h6>
+-->                         <div class="card-body">
+<!--                            <iframe src="{{ details.song_preview }}"width="300" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+-->
                         </div>
                     </div>
                 </div>
