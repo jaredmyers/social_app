@@ -1,16 +1,30 @@
 from django.shortcuts import render
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
+from .forms import AddFriend
 from .user_processing import process_login, register_user
 from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
+from .thread_processing import get_friends
 import json
 from .api_processing import get_recommended_friends, get_recommended_details
 
 
-def vaidate_session():
-    pass
+def validate_session(request):
+    '''validate session'''
+
+    if 'sessionID' in request.COOKIES:
+        sessionID = request.COOKIES['sessionID']
+        print("cookie detected...")
+        # send it off to database here
+        # in order to be checked
+        # if not good, delete cookie if exist
+        # send user back to login page
+
+        return sessionID
+    else:
+        return None
 
 
 def login(request):
@@ -198,7 +212,17 @@ def recommended_details(request, username):
 
 
 def chat(request):
-    return render(request, "chat.html")
+
+    sessionID = validate_session(request)
+
+    friends_list = get_friends(sessionID)
+    friend_number = len(friends_list)
+
+    friend_response = True
+
+    return render(request, "chat.html", {
+        "form": AddFriend(), "friends_list": friends_list, "friend_number": friend_number, "friend_response": friend_response
+        })
 
 
 def logout(request):

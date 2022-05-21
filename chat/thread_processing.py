@@ -10,7 +10,7 @@ conn = mysql.connector.connect(
         database=cred.db_database
         )
 
-
+# thread page processing
 def get_thread_info():
     '''gets threads from database to display on forum page'''
 
@@ -113,6 +113,48 @@ def send_new_reply(sessionID, threadID, replycontent):
     conn.commit()
 
     return '1'
+
+
+# Chat page processing
+def get_friends(sessionID):
+    '''fetch users friends for their friend list'''
+    
+    query = "select userID from sessions where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    userID = cursor.fetchall()[0][0]
+
+    # grabbing all the users friend relationships
+    query = "select * from friends where userID1=%s or userID2=%s;"
+    val = (userID, userID)
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # return false if user has no friends
+    if not query_result:
+        return ''
+
+    # parsing out just the users friends as userIDs
+    userID_list = []
+    for i in query_result:
+        for p in i:
+            if p != userID:
+                userID_list.append(p) # these are userID ints from db
+
+    # selecting all the users
+    query = "select * from users;"
+    cursor.execute(query)
+    query_result = cursor.fetchall()
+
+    # grabbing all the usernames of all the users friends
+    friend_names = []
+    for i in query_result:
+        if i[0] in userID_list:
+            friend_names.append(i[1])
+
+    return friend_names
+
 
 class ThreadMain():
 
