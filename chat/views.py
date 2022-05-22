@@ -1,12 +1,14 @@
 from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
-from .forms import AddFriend
+from .forms import AddFriend, SendChat
 from .user_processing import process_login, register_user
 from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
 from .thread_processing import get_friends, add_friend
+from .thread_processing import create_chat, get_username, new_chat_message, get_chat_messages
 import json
 from .api_processing import get_recommended_friends, get_recommended_details
 
@@ -237,7 +239,46 @@ def chat(request):
         })
 
 
+def chatroom(request, chat_recipient):
+
+    sessionID = validate_session(request)
+
+    # create chat table between two users if non-existent
+    room_id = create_chat(sessionID, chat_recipient)
+    username = get_username(sessionID)
+    friends_list = get_friends(sessionID)
+    friend_number = len(friends_list)
+
+    return render(request, "chatroom.html", {
+        "form": AddFriend(), "friends_list": friends_list, "friend_number": friend_number, "chat_recipient": chat_recipient, "form2": SendChat(), "room_id": room_id, "username": username
+        })
+
+
+def sendchat(request):
+    room_id = request.POST['room_id']
+    message = request.POST['message']
+    username = request.POST['username']
+
+    print('from djangos sendchat')
+
+    print(room_id, message, username)
+
+    new_message = new_chat_message(username, message, room_id)
+
+    if new_message:
+        print('from sendchat: message sent succesfully')
+        return HttpResponse("message send succesfully")
+    else:
+        print('from sendchat: message did not send')
+        return HttpResponse("message didn't send.")
+
+
+def getMessages(request, room_id):
+    '''receives the current chat and returns to chat page'''
+    message_dict = get_chat_messages(room_id)
+
+    return JsonResponse({"messages": message_dict})
+
+
 def logout(request):
     return render(request, "login.html")
-
-

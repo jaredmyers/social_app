@@ -457,7 +457,7 @@ p {margin: 0;}
                                     <b class="text-inverse">{{ friend }}</b>
                                  </div>
                                  <div class="media-body valign-middle text-right overflow-visible">
-                                       <a href="/site_spotify/room/{{ friend }}" class="btn btn-default">Chat</a>
+                                       <a href="/room/{{ friend }}" class="btn btn-default">Chat</a>
                                  </div>
                             </div>
                         </div>
@@ -521,7 +521,7 @@ p {margin: 0;}
                 setInterval(function(){
                     $.ajax({
                         type: 'GET',
-                        url : "/site_spotify/getMessages/{{room_id}}",
+                        url : "/getMessages/{{room_id}}",
                         success: function(response){
                             console.log(response);
                             $("#display").empty();
@@ -535,7 +535,7 @@ p {margin: 0;}
                             alert('An error occured')
                         }
                     });
-                },2000);
+                },3000);
                 })
                 
         </script>
@@ -548,7 +548,7 @@ p {margin: 0;}
         
                 $.ajax({
                     type:'POST',
-                    url:'/site_spotify/sendchat',
+                    url:'/sendchat',
                     data:{
                         username:$('#username').val(),
                         room_id:$('#room_id').val(),

@@ -200,6 +200,117 @@ def get_friends(sessionID):
     return friend_names
 
 
+def create_chat(sessionID, chat_recipient):
+    '''create chatroom table for the specific chat'''
+    # grab chat creators username and userID
+    query = "select users.uname, users.userID from users inner join sessions on sessions.userID=users.userID where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+    uname1 = query_result[0][0]
+    userID1 = query_result[0][1]
+
+    # grab chat recipient userID
+    query = "select userID from users where uname = %s;"
+    val = (chat_recipient,)
+    cursor.execute(query, val)
+    userID2 = cursor.fetchall()[0][0]
+
+    # check if chatroom already exists
+    query = "select roomID from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+    val = (userID1, userID2, userID2, userID1)
+    cursor.execute(query, val)
+    query_result = cursor.fetchall()
+
+    # create chatroom if one doesn't exist,
+    # update chatroom name into friends table
+    # f-string vars all internal values, not user input
+
+    if not query_result[0][0]:
+        roomID = f"{uname1}_{chat_recipient}"
+        query = f"create table if not exists {roomID} (messageID INT AUTO_INCREMENT PRIMARY KEY, uname VARCHAR(255), message TEXT);"
+        val = (roomID,)
+        cursor.execute(query)
+        conn.commit()
+
+        query = "update friends set roomID=%s where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+        val = (roomID, userID1, userID2, userID2, userID1)
+        cursor.execute(query, val)
+        conn.commit()
+
+        return roomID
+
+    # returns chatroom name if it already existed
+    return query_result[0][0]
+
+
+def get_username(sessionID):
+    '''grabs users username from sessionID data'''
+
+    query = "select users.uname from users inner join sessions on sessions.userID=users.userID where sessionID=%s;"
+    val = (sessionID,)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    username = cursor.fetchall()[0][0]
+
+    return username
+
+
+def new_chat_message(username, chat_message, room_id):
+    '''creates a new chat message for the chatroom id'''
+
+    # inserts new chat message into chatroom
+    query = f"insert into {room_id} (uname, message) values (%s, %s);"
+    val = (username, chat_message)
+    cursor = conn.cursor()
+    cursor.execute(query, val)
+    conn.commit()
+
+    return '1'
+
+
+def get_chat_messages(room_id):
+    '''gets all chat messages for chatroom id to populate chatbox'''
+
+    # grabs all the current messages to see if there are more than 20
+    query = f"select messageID from {room_id};"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    query_result = cursor.fetchall()
+
+    # checl/limit message history to latest 20
+    if len(query_result) > 20:
+        query = f"delete from {room_id} order by messageID ASC LIMIT 1;"
+        cursor.execute(query)
+        conn.commit()
+
+    #  get all remaining messages
+    query = f"select uname, message from {room_id}"
+    cursor.execute(query)
+    query_result = cursor.fetchall()
+
+    # send back formatted as a string to be decompressed into lists
+    # using ; delim for lists, : delim for elements 
+    # update: im leaving this as is for now. ugh.
+    chat_records = ''
+    for i in query_result:
+        chat_records += i[0] + ":" + i[1] + ";"
+
+    # i'll untangle all this later
+    chat_messages = chat_records.split(";")
+    del chat_messages[-1]
+
+    p = 0
+    message_dict = {}
+    for i in chat_messages:
+        message = i.split(":")
+        message_dict[p] = [message[0], message[1]]
+        p += 1
+
+    return message_dict
+
+
 class ThreadMain():
 
     def __init__(self, author, threadID, title, content, date):
