@@ -10,6 +10,7 @@ conn = mysql.connector.connect(
         database=cred.db_database
         )
 
+
 # thread page processing
 def get_thread_info():
     '''gets threads from database to display on forum page'''
@@ -19,6 +20,7 @@ def get_thread_info():
     cursor = conn.cursor()
     cursor.execute(query)
     query_result = cursor.fetchall()
+    cursor.close()
 
     # js strings delimited by semicolon
     json_string = ''
@@ -29,6 +31,7 @@ def get_thread_info():
         json_string += '"content":"'+i[3]+'",'
         json_string += '"date":"'+i[4].strftime('%Y-%m-%d')+'"}'
         json_string += ';'
+
 
     return json_string
 
@@ -42,8 +45,8 @@ def send_new_thread(sessionID, threadname, threadcontent):
     cursor = conn.cursor()
     cursor.execute(query, val)
     query_result = cursor.fetchall()
-
     # returns false if session not valid
+
     if not query_result:
         return ''
 
@@ -54,6 +57,7 @@ def send_new_thread(sessionID, threadname, threadcontent):
     val = (userID, threadname, threadcontent)
     cursor.execute(query, val)
     conn.commit()
+    cursor.close()
 
     return '1'
 
@@ -67,6 +71,7 @@ def get_reply_page(threadID):
     cursor = conn.cursor()
     cursor.execute(query, val)
     query_result = cursor.fetchall()
+    cursor.close()
 
     thread_json_string = ''
     for i in query_result:
@@ -80,8 +85,10 @@ def get_reply_page(threadID):
     # grab all relevant reply data for the given forum thread
     query = "select users.uname, replies.content, replies.replyts from users,replies where users.userID=replies.userID and replies.threadID=%s order by replies.replyts desc;"
     val = (threadID,)
+    cursor = conn.cursor()
     cursor.execute(query, val)
     query_result = cursor.fetchall()
+    cursor.close()
 
     replies_json_string = ''
     for i in query_result:
@@ -100,6 +107,7 @@ def send_new_reply(sessionID, threadID, replycontent):
     cursor = conn.cursor()
     cursor.execute(query, val)
     query_result = cursor.fetchall()
+    cursor.close()
 
     # return false if session not vaild
     if not query_result:
@@ -109,8 +117,10 @@ def send_new_reply(sessionID, threadID, replycontent):
     # inserts new reply into replies table
     query = "insert into replies (threadID, userID, content) values (%s, %s, %s);"
     val = (threadID, userID, replycontent)
+    cursor = conn.cursor()
     cursor.execute(query, val)
     conn.commit()
+    cursor.close()
 
     return '1'
 
@@ -156,6 +166,7 @@ def add_friend(sessionID, username):
     val = (userID1, userID2)
     cursor.execute(query, val)
     conn.commit()
+    cursor.close()
 
     return '1'
 
@@ -190,6 +201,7 @@ def get_friends(sessionID):
     query = "select * from users;"
     cursor.execute(query)
     query_result = cursor.fetchall()
+    cursor.close()
 
     # grabbing all the usernames of all the users friends
     friend_names = []
@@ -238,10 +250,12 @@ def create_chat(sessionID, chat_recipient):
         val = (roomID, userID1, userID2, userID2, userID1)
         cursor.execute(query, val)
         conn.commit()
+        cursor.close()
 
         return roomID
 
     # returns chatroom name if it already existed
+    cursor.close()
     return query_result[0][0]
 
 
@@ -253,6 +267,7 @@ def get_username(sessionID):
     cursor = conn.cursor()
     cursor.execute(query, val)
     username = cursor.fetchall()[0][0]
+    cursor.close()
 
     return username
 
@@ -266,6 +281,7 @@ def new_chat_message(username, chat_message, room_id):
     cursor = conn.cursor()
     cursor.execute(query, val)
     conn.commit()
+    cursor.close()
 
     return '1'
 
@@ -289,6 +305,7 @@ def get_chat_messages(room_id):
     query = f"select uname, message from {room_id}"
     cursor.execute(query)
     query_result = cursor.fetchall()
+    cursor.close()
 
     # send back formatted as a string to be decompressed into lists
     # using ; delim for lists, : delim for elements 

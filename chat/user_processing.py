@@ -19,6 +19,7 @@ def generate_hashpw(pw):
 
     return hashed.decode('utf-8')
 
+
 def generate_sessionId(username):
     '''generates a user sessionId for a new login'''
     # grab current usernames userID
@@ -59,6 +60,9 @@ def process_login(username, password):
 
     uname = query_result[0][0]
     hashed = query_result[0][1]
+
+    print("from process_login:")
+    print(uname, hashed)
 
     # this is where the hash will be checked using bcrypt
     cred_match = bcrypt.checkpw(password.encode(), hashed.encode())
