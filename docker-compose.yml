@@ -9,7 +9,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=password
     volumes:
-      - ./db/db-data:/var/lib/mysql
+      - ./volumes/db-data:/var/lib/mysql
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -19,5 +19,5 @@ services:
       - 15672:15672
       - 5672:5672
     volumes:
-      - ./mq/rabbit-data:/var/lib/rabbitmq
+      - ./volumes/rabbit-data:/var/lib/rabbitmq
 
