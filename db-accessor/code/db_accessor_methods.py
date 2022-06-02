@@ -45,6 +45,8 @@ def accessor_methods(body, queue):
 
     def process_login(body):
         '''check user provided login creds against db '''
+        print("from process_login of db_accessor_methods, body:")
+        print(body)
         username = body["username"]
         password = body["password"]
 
@@ -75,8 +77,19 @@ def accessor_methods(body, queue):
 
         return ''
 
+    print("body of db_accessor_methods:")
+    print(body)
     body = body.decode('utf-8')
+    print("body after decode...")
+    print(body)
     body = json.loads(body)
+    print("body after json.loads..")
+    print(body)
+    print(type(body))
 
-    if "login" in body:
+    if body['Type'] == 'login':
+        print("login is in body")
         return process_login(body)
+    else:
+        print("login not in body?")
+        return ''
