@@ -18,7 +18,7 @@ services:
     depends_on:
       - rabbitmq
   rabbitmq:
-    image: rabbitmq:3-management
+    build: ./mq
     container_name: mq
     ports:
       - 15672:15672

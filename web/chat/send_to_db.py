@@ -12,6 +12,7 @@ def send_to_db(message, queue):
     print(" [x] Publishing message...")
     print(message)
 
+    # dumping dict (json) to string
     message = json.dumps(message)
 
     response = rpc_publish.call(message, queue)

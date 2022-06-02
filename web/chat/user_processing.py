@@ -4,14 +4,15 @@ import chat.credentials as cred
 import bcrypt
 from chat.send_to_db import send_to_db
 
+"""
 conn = mysql.connector.connect(
         host=cred.db_host,
         user=cred.db_user,
         password=cred.db_pw,
         database=cred.db_database
         )
-
-
+"""
+"""
 def generate_hashpw(pw):
     '''generates password hash to store'''
     salt = bcrypt.gensalt()
@@ -46,7 +47,7 @@ def generate_sessionId(username):
     conn.commit()
 
     return sessionID
-
+"""
 """
 def process_login(username, password):
     '''check user login credentials against db '''
@@ -81,16 +82,28 @@ def process_login(username, password):
 #        return ''
 """
 
+
 def process_login(username, password):
     message = {}
-    message["Type"] = "login"
+    message["type"] = "login"
     message["username"] = username
     message["password"] = password
 
-    response = send_to_db(message, 'check_session')
+    response = send_to_db(message, 'user_processing')
     return response
 
 
+def register_user(username, pw):
+    message = {}
+    message["type"] = "register"
+    message["username"] = username
+    message["pw"] = pw
+
+    response = send_to_db(message, 'user_processing')
+    return response
+
+
+"""
 def register_user(username, pw):
     '''registers new user in db'''
     hashedpw = generate_hashpw(pw)
@@ -112,3 +125,4 @@ def register_user(username, pw):
         return generate_sessionId(username)
     else:
         return ''
+"""

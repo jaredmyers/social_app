@@ -43,6 +43,14 @@ def accessor_methods(body, queue):
 
         return sessionID
 
+    def generate_hashpw(pw):
+        '''generates new user password hash to store'''
+        salt = bcrypt.gensalt()
+        pw = pw.encode()
+        hashed = bcrypt.hashpw(pw, salt)
+
+        return hashed.decode('utf-8')
+
     def process_login(body):
         '''check user provided login creds against db '''
         print("from process_login of db_accessor_methods, body:")
@@ -77,6 +85,31 @@ def accessor_methods(body, queue):
 
         return ''
 
+    def register_user(body):
+        '''registers new user in db'''
+        username = body['username']
+        pw = body['pw']
+
+        hashedpw = generate_hashpw(pw)
+
+        # check if username already exists
+        query = "select userID from users where uname = %s;"
+        val = (username,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # create if username doesn't exist, else return
+        if not query_result:
+            query = "insert into users (uname, pw) values (%s, %s);"
+            val = (username, hashedpw)
+            cursor.execute(query, val)
+            conn.commit()
+
+            return generate_sessionId(username)
+        else:
+            return ''
+
     print("body of db_accessor_methods:")
     print(body)
     body = body.decode('utf-8')
@@ -87,9 +120,14 @@ def accessor_methods(body, queue):
     print(body)
     print(type(body))
 
-    if body['Type'] == 'login':
+# main entry point
+#
+
+    if body['type'] == 'login':
         print("login is in body")
         return process_login(body)
+    elif body['type'] == 'register':
+        return register_user(body)
     else:
-        print("login not in body?")
+        print("db_accessor_meth detected no valid body value")
         return ''
