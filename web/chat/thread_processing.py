@@ -28,6 +28,42 @@ def get_thread_info():
     return list_json_strings
 
 
+def send_new_thread(sessionID, threadname, threadcontent):
+    '''sends info to driver to create new forum thread'''
+
+    message = {}
+    message['type'] = 'send_new_thread'
+    message['sessionID'] = sessionID
+    message['threadname'] = threadname
+    message['threadcontent'] = threadcontent
+
+    print('send_new_thread sending to db...')
+    response = send_to_db(message, 'thread_chat_proc')
+
+
+def get_reply_page(threadID):
+    pass
+    message = {}
+    message['type'] = 'get_reply_page'
+    message['threadID'] = threadID
+
+    print('get_reply_page sending to db...')
+    response = send_to_db(message, 'thread_chat_proc')
+
+    return response
+
+
+def send_new_reply(sessionID, threadID, replycontent):
+    '''create/send new reply on given threadID to mq for db'''
+    message = {}
+    message['sessionID'] = sessionID
+    message['threadID'] = threadID
+    message['replycontent'] = replycontent
+
+    print('send_new_reply sending to db...')
+    response = send_to_db(message, 'thread_chat_proc')
+
+
 """
 # thread page processing
 def get_thread_info():
@@ -61,6 +97,8 @@ def get_thread_info():
     return json_string
 """
 
+
+"""
 def send_new_thread(sessionID, threadname, threadcontent):
     ''''creates new forum thread'''
 
@@ -85,8 +123,8 @@ def send_new_thread(sessionID, threadname, threadcontent):
     cursor.close()
 
     return '1'
-
-
+"""
+"""
 def get_reply_page(threadID):
     '''gets replies for a given forum thread for reply page'''
 
@@ -123,7 +161,10 @@ def get_reply_page(threadID):
         replies_json_string += ';'
 
     return (thread_json_string + replies_json_string)
+"""
 
+
+"""
 def send_new_reply(sessionID, threadID, replycontent):
     '''create/send new reply on given threadID to database'''
     # grab the users id
@@ -148,6 +189,7 @@ def send_new_reply(sessionID, threadID, replycontent):
     cursor.close()
 
     return '1'
+"""
 
 
 def add_friend(sessionID, username):

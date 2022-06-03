@@ -135,6 +135,111 @@ def accessor_methods(body, queue):
 
         return threads_string
 
+    def send_new_thread(body):
+        '''creates new thread'''
+        sessionID = body['sessionID']
+        threadname = body['threadname']
+        threadcontent = body['threadcontent']
+
+        # grab the users userID
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # returns false if session not valid
+        if not query_result:
+            return ''
+
+        userID = query_result[0][0]
+
+        # inserts new forum post into threads table
+        query = "insert into threads (userID, title, content) values (%s, %s, %s);"
+        val = (userID, threadname, threadcontent)
+        cursor.execute(query, val)
+        conn.commit()
+        cursor.close()
+
+        return '0'
+
+    def get_reply_page(body):
+        '''gets replies for a given forum thread for reply page'''
+        threadID = body['threadID']
+
+        # grab all relevant forum thread information
+        query = "select users.uname, threads.threadID, threads.title, threads.content, threads.ts from users,threads where users.userID=threads.userID and threads.threadID=%s;"
+        val = (threadID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        thread = {}
+        threads_string = ''
+        for i in query_result:
+            thread['author'] = i[0]
+            thread['threadID'] = str(i[1])
+            thread['title'] = i[2]
+            thread['content'] = i[3]
+            thread['date'] = i[4].strftime('%Y-%m-%d')
+
+            threads_string += json.dumps(thread)
+            threads_string += '+'
+
+        # grab all relevant reply data for the given forum thread
+        query = "select users.uname, replies.content, replies.replyts from users,replies where users.userID=replies.userID and replies.threadID=%s order by replies.replyts desc;"
+        val = (threadID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        replies = {}
+        replies_string = ''
+        for i in query_result:
+            replies['author'] = i[0]
+            replies['content'] = i[1]
+            replies['date'] = i[2].strftime('%Y-%m-%d')
+
+            replies_string += json.dumps(replies)
+            replies_string += ';'
+
+        # returns json strings, in the delimited format of:
+        # threadcontent+replycontent;replycontent;
+        # will figure more elegant solution later, prob embed json
+        return (threads_string + replies_string)
+
+    def send_new_reply(body):
+        '''create/send new reply on given threadID'''
+        sessionID = body['sessionID']
+        threadID = body['threadID']
+        replycontent = body['replycontent']
+
+        # grab the users id
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        # return false if session not valid
+        if not query_result:
+            return ''
+
+        userID = query_result[0][0]
+
+        # insert new reply into replies table
+        query = "insert into replies (threadID, userID, content) values (%s, %s, %s);"
+        val = (threadID, userID, replycontent)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        conn.commit()
+        cursor.close()
+
+        return '0'
+
 
 # main entry point
     print("body of db_accessor_methods:")
@@ -154,6 +259,12 @@ def accessor_methods(body, queue):
         return register_user(body)
     elif body['type'] == 'get_threads':
         return get_thread_info()
+    elif body['type'] == 'send_new_thread':
+        return send_new_thread(body)
+    elif body['type'] == 'get_reply_page':
+        return get_reply_page(body)
+    elif body['type'] == 'send_new_reply':
+        return send_new_reply(body)
     else:
         print("db_accessor_meth detected no valid body value")
         return ''
