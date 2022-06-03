@@ -1,16 +1,34 @@
 import json
 import mysql
 import chat.credentials as cred
+from chat.send_to_db import send_to_db
 
-
+"""
 conn = mysql.connector.connect(
         host=cred.db_host,
         user=cred.db_user,
         password=cred.db_pw,
         database=cred.db_database
         )
+"""
 
 
+# thread page processing
+def get_thread_info():
+    '''gets threads from database to display on forum page'''
+    message = {}
+    message['type'] = 'get_threads'
+    print('get_thread_info sending to db...')
+    response = send_to_db(message, 'thread_chat_proc')
+
+    list_json_strings = response.split(';')
+    del list_json_strings[-1]
+    print('get_thread_info returning: ')
+    print(list_json_strings)
+    return list_json_strings
+
+
+"""
 # thread page processing
 def get_thread_info():
     '''gets threads from database to display on forum page'''
@@ -32,9 +50,16 @@ def get_thread_info():
         json_string += '"date":"'+i[4].strftime('%Y-%m-%d')+'"}'
         json_string += ';'
 
-
+    # threads = {}
+    # threads['author'] = i[0]
+    # threads['threadsID'] = str(i[1])
+    # threads['title'] = i[2]
+    # threads['content'] = i[3]
+    # threads['date'] = i[4].strftime('%Y-%m-%d')
+    # threads = json.dumps(threads)
+    # return threads
     return json_string
-
+"""
 
 def send_new_thread(sessionID, threadname, threadcontent):
     ''''creates new forum thread'''

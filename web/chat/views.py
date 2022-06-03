@@ -125,8 +125,9 @@ def forum(request):
             threadcontent = form.cleaned_data['threadcontent']
             send_new_thread(request.COOKIES['sessionID'], threadname, threadcontent)
 
-    list_of_threads = get_thread_info().split(';')
-    del list_of_threads[-1]
+    #list_of_threads = get_thread_info().split(';')
+    #del list_of_threads[-1]
+    list_of_threads = get_thread_info()
     print(list_of_threads)
 
     thread_posts = []

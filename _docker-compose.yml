@@ -9,23 +9,29 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=password
     volumes:
-      - ./db/db-data:/var/lib/mysql
-  python:
+      - ./volumes/db-data:/var/lib/mysql
+  
+  db-accessor:
     build: ./db-accessor
     container_name: db-accessor
     ports:
       - 8001:5672
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+
   rabbitmq:
     build: ./mq
     container_name: mq
+    hostname: my-rabbit
     ports:
       - 15672:15672
       - 5672:5672
     volumes:
-      - ./rabbitmq/etc/definitions.json:/etc/rabbitmq/definitions.json
-      - ./rabbitmq/etc/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./rabbitmq/etc/data:/var/lib/rabbitmq/mnesia/rabbit@my-rabbit
-      - ./rabbitmq/logs:/var/log/rabbitmq/log
+      - ./volumes/rabbit-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 5s
+      timeout: 15s
+      retries: 5
 

@@ -110,6 +110,33 @@ def accessor_methods(body, queue):
         else:
             return ''
 
+    def get_thread_info():
+        '''gets threads from database to display on forum page'''
+
+        # grab all relevant thread information
+        query = "select users.uname, threads.threadID, threads.title, threads.content, threads.ts from users,threads where users.userID=threads.userID order by ts desc"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        # parse info for sending through mq
+        thread = {}
+        threads_string = ''
+        for i in query_result:
+            thread['author'] = i[0]
+            thread['threadID'] = str(i[1])
+            thread['title'] = i[2]
+            thread['content'] = i[3]
+            thread['date'] = i[4].strftime('%Y-%m-%d')
+
+            threads_string += json.dumps(thread)
+            threads_string += ';'
+
+        return threads_string
+
+
+# main entry point
     print("body of db_accessor_methods:")
     print(body)
     body = body.decode('utf-8')
@@ -120,14 +147,13 @@ def accessor_methods(body, queue):
     print(body)
     print(type(body))
 
-# main entry point
-#
-
     if body['type'] == 'login':
         print("login is in body")
         return process_login(body)
     elif body['type'] == 'register':
         return register_user(body)
+    elif body['type'] == 'get_threads':
+        return get_thread_info()
     else:
         print("db_accessor_meth detected no valid body value")
         return ''

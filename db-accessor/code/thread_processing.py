@@ -32,7 +32,6 @@ def get_thread_info():
         json_string += '"date":"'+i[4].strftime('%Y-%m-%d')+'"}'
         json_string += ';'
 
-
     return json_string
 
 
