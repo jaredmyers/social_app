@@ -240,6 +240,206 @@ def accessor_methods(body, queue):
 
         return '0'
 
+    def add_friend(body):
+        '''adds friend to users friendlist'''
+        sessionID = body['sessionID']
+        username = body['friendname']
+
+        # grab current users userID
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        userID1 = cursor.fetchall()[0][0]
+
+        # grab potential friends userID
+        query = "select userID from users where uname=%s;"
+        val = (username,)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # returns false if potential friend doesn't exist
+        if not query_result:
+            return ''
+
+        userID2 = query_result[0][0]
+
+        # return false if user tries to friend self
+        if userID1 == userID2:
+            return ''
+
+        # check if they are already friends
+        query = "select * from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+        val = (userID1, userID2, userID2, userID1)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # returns false if already friends
+        if query_result:
+            return ''
+
+        # add friend relationship to friends table
+        query = "insert into friends (userID1, userID2) values (%s, %s);"
+        val = (userID1, userID2)
+        cursor.execute(query, val)
+        conn.commit()
+        cursor.close()
+
+        return '0'
+
+    # chat page processing
+    def get_friends(body):
+        '''fetch user friends for their friend list'''
+        sessionID = body['sessionID']
+
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        userID = cursor.fetchall()[0][0]
+
+        # grabbing all the users friend relationships
+        query = "select * from friends where userID1=%s or userID2=%s;"
+        val = (userID, userID)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # return false if user has no friends
+        if not query_result:
+            return ''
+
+        # parsing out just the users friends as userIDs
+        userID_list = []
+        for i in query_result:
+            for p in i:
+                if p != userID:
+                    userID_list.append(p)  # these are userID ints from db
+
+        # selecting all the users
+        query = "select * from users;"
+        cursor.execute(query)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        # grabbing all the usernames of all the users friends
+        friend_names = ''
+        for i in query_result:
+            if i[0] in userID_list:
+                friend_names += i[1] + ":"
+
+        return friend_names
+
+    def create_chat(body):
+        '''create chatroom table for the specific chat'''
+        sessionID = body['sessionID']
+        chat_recipient = body['chat_recipient']
+
+        # grab chat creators username and userID
+        query = "select users.uname, users.userID from users inner join sessions on sessions.userID=users.userID where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+        uname1 = query_result[0][0]
+        userID1 = query_result[0][1]
+
+        # grab chat recipient userID
+        query = "select userID from users where uname = %s;"
+        val = (chat_recipient,)
+        cursor.execute(query, val)
+        userID2 = cursor.fetchall()[0][0]
+
+        # check if chatroom already exists
+        query = "select roomID from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+        val = (userID1, userID2, userID2, userID1)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # create chatroom if one doesn't exist,
+        # update chatroom name into friends table
+        # f-string vars all internal, not user input
+
+        if not query_result[0][0]:
+            roomID = f"{uname1}_{chat_recipient}"
+            query = f"create table if not exists {roomID} (messageID INT AUTO_INCREMENT PRIMARY KEY, uname VARCHAR(255), message TEXT);"
+            val = (roomID,)
+            cursor.execute(query)
+            conn.commit()
+
+            query = "update friends set roomID=%s where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+            val = (roomID, userID1, userID2, userID2, userID1)
+            cursor.execute(query, val)
+            conn.commit()
+            cursor.close()
+
+            return roomID
+
+        # returns chatroom name if it already existed
+        cursor.close()
+        return query_result[0][0]
+
+    def get_username(body):
+        '''grabs user username from sessionID data'''
+
+        sessionID = body['sessionID']
+
+        query = "select users.uname from users inner join sessions on sessions.userID=users.userID where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        username = cursor.fetchall()[0][0]
+        cursor.close()
+
+        return username
+
+    def new_chat_message(body):
+        '''creates a new chat message for the chatroom id'''
+        username = body['username']
+        chat_message = body['chat_message']
+        room_id = body['room_id']
+
+        # inserts new chat message into chatroom
+        query = f"insert into {room_id} (uname, message) values (%s, %s);"
+        val = (username, chat_message)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        conn.commit()
+        cursor.close()
+
+        return '0'
+
+    def get_chat_messages(body):
+        '''gets all chat messages for chatroom id to populate chatbox'''
+
+        room_id = body['room_id']
+
+        # grabs all the current messages to see if there are more than 20
+        query = f"select messageID from {room_id};"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        query_result = cursor.fetchall()
+
+        # check/limit message history to latest 20
+        if len(query_result) > 20:
+            query = f"delete from {room_id} order by messageID ASC LIMIT 1;"
+            cursor.execute(query)
+            conn.commit()
+
+        # get all remaining messages
+        query = f"select uname, message from {room_id};"
+        cursor.execute(query)
+        query_result = cursor.fetchall()
+        cursor.close()
+
+        # send back formatted string to be decompressed into lists
+        chat_records = ''
+        for i in query_result:
+            chat_records += i[0] + ":" + i[1] + ";"
+
+        return chat_records
+
+    def remove_friend(body):
+        pass
 
 # main entry point
     print("body of db_accessor_methods:")
@@ -265,6 +465,20 @@ def accessor_methods(body, queue):
         return get_reply_page(body)
     elif body['type'] == 'send_new_reply':
         return send_new_reply(body)
+    elif body['type'] == 'add_friend':
+        return add_friend(body)
+    elif body['type'] == 'get_friends':
+        return get_friends(body)
+    elif body['type'] == 'create_chat':
+        return create_chat(body)
+    elif body['type'] == 'get_username':
+        return get_username(body)
+    elif body['type'] == 'new_chat_message':
+        return new_chat_message(body)
+    elif body['type'] == 'get_chat_messages':
+        return get_chat_messages(body)
+    elif body['type'] == 'remove_friend':
+        return remove_friend(body)
     else:
         print("db_accessor_meth detected no valid body value")
         return ''

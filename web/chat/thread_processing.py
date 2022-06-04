@@ -56,6 +56,7 @@ def get_reply_page(threadID):
 def send_new_reply(sessionID, threadID, replycontent):
     '''create/send new reply on given threadID to mq for db'''
     message = {}
+    message['type'] = 'send_new_reply'
     message['sessionID'] = sessionID
     message['threadID'] = threadID
     message['replycontent'] = replycontent
@@ -191,7 +192,7 @@ def send_new_reply(sessionID, threadID, replycontent):
     return '1'
 """
 
-
+"""
 def add_friend(sessionID, username):
     '''adds friend to users friendlist'''
 
@@ -236,7 +237,102 @@ def add_friend(sessionID, username):
     cursor.close()
 
     return '1'
+"""
 
+
+def add_friend(sessionID, friendname):
+    message = {}
+    message['type'] = 'add_friend'
+    message['sessionID'] = sessionID
+    message['friendname'] = friendname
+
+    response = send_to_db(message, 'thread_chat_proc')
+
+    return response
+
+
+def get_friends(sessionID):
+    message = {}
+    message['type'] = 'get_friends'
+    message['sessionID'] = sessionID
+    response = send_to_db(message, 'thread_chat_proc')
+
+    if not response:
+        return []
+
+    friends_list = response.split(":")
+    del friends_list[-1]
+
+    return friends_list
+
+
+def create_chat(sessionID, chat_recipient):
+    message = {}
+    message['type'] = 'create_chat'
+    message['sessionID'] = sessionID
+    message['chat_recipient'] = chat_recipient
+
+    response = send_to_db(message, 'thread_chat_proc')
+
+    return response
+
+
+def get_username(sessionID):
+    message = {}
+    message['type'] = 'get_username'
+    message['sessionID'] = sessionID
+
+    response = send_to_db(message, 'thread_chat_proc')
+
+    return response
+
+
+def new_chat_message(username, new_message, room_id):
+    message = {}
+    message['type'] = 'new_chat_message'
+    message['username'] = username
+    message['chat_message'] = new_message
+    message['room_id'] = room_id
+
+    print("new_chat_message values are...")
+    print(message['type'])
+    print(type(message['type']))
+    print(message['username'])
+    print(type(message['username']))
+    print(message['chat_message'])
+    print(type(message['chat_message']))
+    print(message['room_id'])
+    print(type(message['room_id']))
+
+    response = send_to_db(message, 'thread_chat_proc')
+
+    return response
+
+
+def get_chat_messages(room_id):
+    message = {}
+    message['type'] = 'get_chat_messages'
+    message['room_id'] = room_id
+
+    response = send_to_db(message, 'thread_chat_proc')
+
+    chat_messages = response.split(";")
+    del chat_messages[-1]
+
+    p = 0
+    message_dict = {}
+    for i in chat_messages:
+        message = i.split(":")
+        message_dict[p] = [message[0], message[1]]
+        p += 1
+
+    return message_dict
+
+
+def remove_friend(sessionID, friendname):
+    pass
+
+"""
 # Chat page processing
 def get_friends(sessionID):
     '''fetch users friends for their friend list'''
@@ -393,6 +489,7 @@ def get_chat_messages(room_id):
         p += 1
 
     return message_dict
+"""
 
 
 class ThreadMain():
