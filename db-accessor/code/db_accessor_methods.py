@@ -17,6 +17,48 @@ def accessor_methods(body, queue):
             )
     print("accessor method connected to db")
 
+    def delete_session(body):
+        '''deletes a session'''
+        sessionID = body['sessionID']
+
+        query = "delete from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        conn.commit()
+
+        return '0'
+
+    def check_session(body):
+        '''checks to see if session exists and is still valid'''
+        sessionID = body['sessionID']
+        token_expiry = 0.50
+
+        # grab the given session time
+        query = "select sessionID, sTime from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # return false if session doesn't exist
+        # check sessions time, delete if expired
+        if not query_result:
+            return ''
+
+        token_issue_date = query_result[0][1]
+        current_time = datetime.datetime.now()
+        diff = current_time - token_issue_date
+        diff_hours = diff.total_seconds()/3600
+
+        if diff_hours > token_expiry:
+            wrapper = {}
+            wrapper['sessionID'] = sessionID
+            delete_session(wrapper)
+            return ''
+
+        return query_result[0][0]
+
     def generate_sessionId(username):
         '''generates user sessionId for new login'''
         # grab current usersnames userID
@@ -479,6 +521,8 @@ def accessor_methods(body, queue):
         return get_chat_messages(body)
     elif body['type'] == 'remove_friend':
         return remove_friend(body)
+    elif body['type'] == 'check_session':
+        return check_session(body)
     else:
         print("db_accessor_meth detected no valid body value")
         return ''
