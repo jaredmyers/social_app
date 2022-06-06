@@ -15,18 +15,33 @@ from .api_processing import get_recommended_friends, get_recommended_details
 
 def validate_session(request):
     '''validate session'''
+    # check for valid sessionID
+
+    print('validating session...')
+    if 'sessionID' not in request.COOKIES:
+
+        print('no cookie detected')
+        please_log_in = True
+        response = render(request, "login.html", {
+            "form": LoginForm(), "please_log_in": please_log_in
+            })
+        return ['', response]
 
     if 'sessionID' in request.COOKIES:
-        sessionID = request.COOKIES['sessionID']
-        print("cookie detected...")
-        # send it off to database here
-        # in order to be checked
-        # if not good, delete cookie if exist
-        # send user back to login page
-
-        return sessionID
-    else:
-        return None
+        print('cookie detected')
+        session_response = check_session(request.COOKIES['sessionID'])
+        print(f'response: {session_response}')
+        if not session_response:
+            print('cookie false or expired')
+            session_expired = True
+            response = render(request, 'login.html', {
+                'form': LoginForm(), 'session_expired': session_expired
+                })
+            response.delete_cookie('sessionID')
+            print('session terminated')
+            return ['', response]
+        else:
+            return [session_response, '']
 
 
 def login(request):
@@ -108,31 +123,26 @@ def register(request):
 def home(request):
     '''main homepage for logged in user'''
 
-    # check for valid sessionID
-
-    if 'sessionID' in request.COOKIES:
-        print('cookie detected')
-        response = check_session(request.COOKIES['sessionID'])
-        print(f'response: {response}')
-        if not response:
-            print('cookie false or expired')
-            session_expired = True
-            response = render(request, 'login.html', {
-                'form': LoginForm(), 'session_expired': session_expired
-                })
-            response.delete_cookie('sessionID')
-            print('session terminated')
-            return response
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
 
     return render(request, "home.html")
 
 
 def forum(request):
 
-    # --- Connection validation ---
-    # --- making sure user has valid session ---
-    # --- code here
-    # ---
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
+
+    sessionID = session_status[0]
 
     # validate if post request,
     # take in and send new thread to threads table
@@ -141,7 +151,7 @@ def forum(request):
         if form.is_valid():
             threadname = form.cleaned_data['threadname']
             threadcontent = form.cleaned_data['threadcontent']
-            send_new_thread(request.COOKIES['sessionID'], threadname, threadcontent)
+            send_new_thread(sessionID, threadname, threadcontent)
 
     #list_of_threads = get_thread_info().split(';')
     #del list_of_threads[-1]
@@ -201,12 +211,14 @@ def thread(request, id):
 
 def friendslist(request):
 
-    # --- Connection validation ---
-    # --- making sure user has valid session ---
-    # --- code here
-    # ---
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
 
-    sessionID = validate_session(request)
+    sessionID = session_status[0]
     friend_response = False
 
     # adds friend is users clicks 'add friend'
@@ -232,7 +244,14 @@ def friendslist(request):
 
 def recommended_details(request, username):
 
-    sessionID = request.COOKIES['sessionID']
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
+
+    sessionID = session_status[0]
 
     recommended_friends = get_recommended_friends(sessionID)
     recommended_num = len(recommended_friends)
@@ -246,7 +265,14 @@ def recommended_details(request, username):
 
 def chat(request):
 
-    sessionID = validate_session(request)
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
+
+    sessionID = session_status[0]
 
     friends_list = get_friends(sessionID)
     friend_number = len(friends_list)
@@ -260,7 +286,14 @@ def chat(request):
 
 def chatroom(request, chat_recipient):
 
-    sessionID = validate_session(request)
+    # validate current session
+    session_status = validate_session(request)
+    print("session status is:")
+    print(session_status)
+    if not session_status[0]:
+        return session_status[1]
+
+    sessionID = session_status[0]
 
     # create chat table between two users if non-existent
     room_id = create_chat(sessionID, chat_recipient)
