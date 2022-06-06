@@ -3,7 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
 from .forms import AddFriend, SendChat
-from .user_processing import process_login, register_user
+from .user_processing import process_login, register_user, check_session
 from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
@@ -112,7 +112,7 @@ def home(request):
 
     if 'sessionID' in request.COOKIES:
         print('cookie detected')
-        response = validate_cookie(request.COOKIES['sessionID'])
+        response = check_session(request.COOKIES['sessionID'])
         print(f'response: {response}')
         if not response:
             print('cookie false or expired')
@@ -123,7 +123,7 @@ def home(request):
             response.delete_cookie('sessionID')
             print('session terminated')
             return response
-        
+
     return render(request, "home.html")
 
 

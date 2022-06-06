@@ -103,6 +103,14 @@ def register_user(username, pw):
     return response
 
 
+def check_session(sessionID):
+    message = {}
+    message["type"] = "check_session"
+    message["sessionID"] = sessionID
+
+    response = send_to_db(message, 'user_processing')
+    return response
+
 """
 def register_user(username, pw):
     '''registers new user in db'''
