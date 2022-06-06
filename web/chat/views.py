@@ -106,6 +106,24 @@ def register(request):
 
 
 def home(request):
+    '''main homepage for logged in user'''
+
+    # check for valid sessionID
+
+    if 'sessionID' in request.COOKIES:
+        print('cookie detected')
+        response = validate_cookie(request.COOKIES['sessionID'])
+        print(f'response: {response}')
+        if not response:
+            print('cookie false or expired')
+            session_expired = True
+            response = render(request, 'login.html', {
+                'form': LoginForm(), 'session_expired': session_expired
+                })
+            response.delete_cookie('sessionID')
+            print('session terminated')
+            return response
+        
     return render(request, "home.html")
 
 
