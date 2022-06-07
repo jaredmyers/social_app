@@ -485,7 +485,7 @@ def accessor_methods(body, queue):
 
     def get_recommended(body):
         sessionID = body['sessionID']
-         
+
         # grab userID of current user based on session data
         query = "select userID from sessions where sessionID=%s;"
         val = (sessionID,)
@@ -507,7 +507,7 @@ def accessor_methods(body, queue):
         for tup in query_result:
             matched_friends.append(tup[0])
 
-        return matched_friends
+        return json.dumps(matched_friends)
 
 # main entry point
     print("body of db_accessor_methods:")

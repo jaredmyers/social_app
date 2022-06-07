@@ -26,6 +26,8 @@ def get_recommended_friends(sessionID):
     message['sessionID'] = sessionID
     matched_friends = send_to_db(message, 'thread_chat_proc')
 
+    return json.loads(matched_friends)
+
 
 """
 def get_recommended_friends(sessionID):
@@ -64,8 +66,19 @@ def get_recommended_details(sessionID, username):
     message['sessionID'] = sessionID
     message['username'] = username
 
-    response = send_to_api(message, 'api_processing')
+    details = send_to_api(message, 'api_processing')
 
+    obj = DisplayDetailsPage(
+            details["tracks"],
+            details["artists"],
+            details["genres"],
+            details["albums"],
+            details["preview"]
+            )
+
+    return obj
+
+"""
 def get_recommended_details(sessionID, username):
     '''simulated api response since the api was cut from this sample'''
     '''this gets the details on which info the users were matched'''
@@ -76,7 +89,7 @@ def get_recommended_details(sessionID, username):
     obj = DisplayDetailsPage(details["tracks"], details["artists"], details["genres"], details["albums"], details["preview"])
 
     return obj
-
+"""
 
 class DisplayDetailsPage():
 

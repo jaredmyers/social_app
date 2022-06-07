@@ -1,5 +1,5 @@
 from chat.PikaClasses import RpcPublisher
-import chat.credentails as cred
+import chat.credentials as cred
 import json
 
 '''
@@ -18,4 +18,7 @@ def send_to_api(message, queue):
     response = rpc_publish.call(message, queue)
     print(" [.] Got %r" % response)
 
-    return response.decode('utf-8')
+    response.decode('utf-8')
+    response = json.loads(response)
+
+    return response
