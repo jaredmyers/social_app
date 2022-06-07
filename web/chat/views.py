@@ -3,7 +3,8 @@ from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
 from .forms import AddFriend, SendChat
-from .user_processing import process_login, register_user, check_session
+from .user_processing import process_login, register_user
+from .user_processing import check_session, delete_session
 from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
@@ -17,7 +18,7 @@ def validate_session(request):
     '''validate session'''
     # check for valid sessionID
 
-    print('validating session...')
+    print('validating_session...')
     if 'sessionID' not in request.COOKIES:
 
         print('no cookie detected')
@@ -124,6 +125,7 @@ def home(request):
     '''main homepage for logged in user'''
 
     # validate current session
+    print('sending to validate session function ...')
     session_status = validate_session(request)
     print("session status is:")
     print(session_status)
@@ -333,4 +335,15 @@ def getMessages(request, room_id):
 
 
 def logout(request):
+    '''log user out, delete session'''
+    if 'sessionID' in request.COOKIES:
+        print('cookie detected')
+        delete_response = delete_session(request.COOKIES['sessionID'])
+        print(f'response: {delete_response}')
+        response = render(request, 'login.html', {
+            'form': LoginForm()
+            })
+        response.delete_cookie('sessionID')
+        print('rendering...')
+        return response
     return render(request, "login.html")

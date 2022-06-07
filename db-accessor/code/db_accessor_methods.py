@@ -523,6 +523,8 @@ def accessor_methods(body, queue):
         return remove_friend(body)
     elif body['type'] == 'check_session':
         return check_session(body)
+    elif body['type'] == 'delete_session':
+        return delete_session(body)
     else:
         print("db_accessor_meth detected no valid body value")
         return ''

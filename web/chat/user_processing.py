@@ -111,6 +111,16 @@ def check_session(sessionID):
     response = send_to_db(message, 'user_processing')
     return response
 
+
+def delete_session(sessionID):
+    message = {}
+    message["type"] = "delete_session"
+    message["sessionID"] = sessionID
+
+    response = send_to_db(message, 'user_processing')
+    return response
+
+
 """
 def register_user(username, pw):
     '''registers new user in db'''
