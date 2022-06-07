@@ -483,6 +483,32 @@ def accessor_methods(body, queue):
     def remove_friend(body):
         pass
 
+    def get_recommended(body):
+        sessionID = body['sessionID']
+         
+        # grab userID of current user based on session data
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+        userID = query_result[0][0]
+
+        # grab all other users from db for potential match
+        # this is done simply because this api is simulated
+        # and needs valid usernames to simulate friend matches
+
+        query = "select uname from users where userID not in (%s);"
+        val = (userID,)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        matched_friends = []
+        for tup in query_result:
+            matched_friends.append(tup[0])
+
+        return matched_friends
+
 # main entry point
     print("body of db_accessor_methods:")
     print(body)
@@ -525,6 +551,8 @@ def accessor_methods(body, queue):
         return check_session(body)
     elif body['type'] == 'delete_session':
         return delete_session(body)
+    elif body['type'] == 'get_recommended':
+        return get_recommended(body)
     else:
         print("db_accessor_meth detected no valid body value")
         return ''

@@ -22,6 +22,18 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+  
+  api-accessor:
+    build: ./api-accessor
+    container_name: api-accessor
+    ports:
+      - 8002:5672
+    volumes:
+      - ./api-accessor/code:/code
+    command: /bin/bash -c "while true; do sleep 1; done"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   rabbitmq:
     build: ./mq

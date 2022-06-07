@@ -5,6 +5,8 @@ import json
 import os
 import mysql
 import chat.credentials as cred
+from chat.send_to_db import send_to_db
+from chat.send_to_api import send_to_api
 
 conn = mysql.connector.connect(
         host=cred.db_host,
@@ -14,6 +16,18 @@ conn = mysql.connector.connect(
         )
 
 
+def get_recommended_friends(sessionID):
+    '''gets recommended friends from api based on mutually liked music'''
+
+    # database portion
+
+    message = {}
+    message['type'] = 'get_recommended'
+    message['sessionID'] = sessionID
+    matched_friends = send_to_db(message, 'thread_chat_proc')
+
+
+"""
 def get_recommended_friends(sessionID):
     '''gets recommened friends from api based on mutually liked music'''
 
@@ -39,7 +53,18 @@ def get_recommended_friends(sessionID):
         matched_friends.append(tup[0])
 
     return matched_friends
+"""
 
+def get_recommended_details(sessionID, username):
+    '''simulated api response since the api was cut from this sample'''
+    '''this gets the details on which info the users were matched'''
+
+    message = {}
+    message['type'] = 'get_details'
+    message['sessionID'] = sessionID
+    message['username'] = username
+
+    response = send_to_api(message, 'api_processing')
 
 def get_recommended_details(sessionID, username):
     '''simulated api response since the api was cut from this sample'''

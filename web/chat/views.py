@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from .forms import LoginForm, RegisterForm, PostThread, PostReply
@@ -26,6 +26,8 @@ def validate_session(request):
         response = render(request, "login.html", {
             "form": LoginForm(), "please_log_in": please_log_in
             })
+
+        #response = redirect('login')
         return ['', response]
 
     if 'sessionID' in request.COOKIES:
@@ -48,6 +50,7 @@ def validate_session(request):
 def login(request):
     '''main login page'''
     # validate post info and send to db for validation
+    bad_login = False
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -77,7 +80,7 @@ def login(request):
 
     # return render(request, 'index.html')
     return render(request, 'login.html', {
-        "form": LoginForm(),
+        "form": LoginForm(), "bad_login": bad_login,
         })
 
 
@@ -336,14 +339,11 @@ def getMessages(request, room_id):
 
 def logout(request):
     '''log user out, delete session'''
+    response = redirect('login')
     if 'sessionID' in request.COOKIES:
         print('cookie detected')
         delete_response = delete_session(request.COOKIES['sessionID'])
-        print(f'response: {delete_response}')
-        response = render(request, 'login.html', {
-            'form': LoginForm()
-            })
-        response.delete_cookie('sessionID')
+        print(f'delete response: {delete_response}')
         print('rendering...')
-        return response
-    return render(request, "login.html")
+        response.delete_cookie('sessionID')
+    return response
