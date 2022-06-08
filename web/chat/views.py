@@ -9,9 +9,11 @@ from .thread_processing import get_thread_info, send_new_thread
 from .thread_processing import ThreadMain, ThreadReplies
 from .thread_processing import get_reply_page, send_new_reply
 from .thread_processing import get_friends, add_friend
+from .thread_processing import remove_friend
 from .thread_processing import create_chat, get_username, new_chat_message, get_chat_messages
 import json
 from .api_processing import get_recommended_friends, get_recommended_details
+from .send_to_db import send_to_db
 
 
 def validate_session(request):
@@ -278,6 +280,31 @@ def chat(request):
         return session_status[1]
 
     sessionID = session_status[0]
+
+    if request.method == 'POST':
+        form = AddFriend(request.POST)
+        print(request.POST)
+        if form.is_valid():
+            print("addfriend form is valid")
+            if 'add_trigger' in request.POST:
+                print("addfriend valid on add")
+                friendname = form.cleaned_data['addfriend']
+                print(friendname)
+                friend_response = add_friend(sessionID, friendname)
+            elif 'remove_trigger' in request.POST:
+                print('addfriend valid on remove')
+                friendname = form.cleaned_data['addfriend']
+                print(friendname)
+                # friend_response = remove_friend(sessionID, friendname)
+
+                # sending remove friend directly to MQ driver
+                # since for some reason python isn't executing from thread_processing
+                m = {}
+                m['type'] = 'remove_friend'
+                m['sessionID'] = sessionID
+                m['friendname'] = friendname
+                print('view sending remove friend to db..')
+                r = send_to_db(m, 'thread_chat_proc')
 
     friends_list = get_friends(sessionID)
     friend_number = len(friends_list)
