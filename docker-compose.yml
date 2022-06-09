@@ -1,6 +1,70 @@
 version: '3'
 
 services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - ./volumes/db-data:/var/lib/mysql
+  
+  db-accessor1:
+    build: ./db-accessor
+    container_name: db-accessor1
+    ports:
+      - 8001:5672
+    volumes:
+      - ./db-accessor/code:/code
+    #command: /bin/bash -c "while true; do sleep 1; done"
+    command: /bin/bash -c "python3 rpc_subscriber.py"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  db-accessor2:
+    build: ./db-accessor
+    container_name: db-accessor2
+    ports:
+      - 8002:5672
+    volumes:
+      - ./db-accessor/code:/code
+    #command: /bin/bash -c "while true; do sleep 1; done"
+    command: /bin/bash -c "python3 rpc_subscriber2.py"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  api-accessor:
+    build: ./api-accessor
+    container_name: api-accessor
+    ports:
+      - 8003:5672
+    volumes:
+      - ./api-accessor/code:/code
+    #command: /bin/bash -c "while true; do sleep 1; done"
+    command: /bin/bash -c "python3 rpc_subscriber2.py"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    build: ./mq
+    container_name: mq
+    hostname: my-rabbit
+    ports:
+      - 15672:15672
+      - 5672:5672
+    volumes:
+      - ./volumes/rabbit-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 5s
+      timeout: 15s
+      retries: 5
+
   django-gunicorn:
     build: ./django-gunicorn
     container_name: django-gunicorn
@@ -10,7 +74,6 @@ services:
       - ./django-gunicorn/static:/static
     env_file:
       - ./django-gunicorn/.env
-        #command: /bin/bash -c "while true; do sleep 1; done"
 
   nginx:
     build: ./nginx
@@ -21,5 +84,4 @@ services:
       - ./django-gunicorn/static:/static
     depends_on:
       - django-gunicorn
-
 

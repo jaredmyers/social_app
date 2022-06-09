@@ -9,4 +9,4 @@ db_database = "chat"
 # rabbit
 mq_user = 'socialUser'
 mq_pw = 'socialUser'
-mq_ip = 'localhost'
+mq_ip = 'my-rabbit'
