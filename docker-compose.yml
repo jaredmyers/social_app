@@ -1,52 +1,25 @@
 version: '3'
 
 services:
-  mysql:
-    image: mysql:latest
-    container_name: mysql
+  django-gunicorn:
+    build: ./django-gunicorn
+    container_name: django-gunicorn
     ports:
-      - 3306:3306
-    environment:
-      - MYSQL_ROOT_PASSWORD=password
+      - 8000:8000
     volumes:
-      - ./volumes/db-data:/var/lib/mysql
-  
-  db-accessor:
-    build: ./db-accessor
-    container_name: db-accessor
-    ports:
-      - 8001:5672
-    volumes:
-      - ./db-accessor/code:/code
-    command: /bin/bash -c "while true; do sleep 1; done"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-  
-  api-accessor:
-    build: ./api-accessor
-    container_name: api-accessor
-    ports:
-      - 8002:5672
-    volumes:
-      - ./api-accessor/code:/code
-    command: /bin/bash -c "while true; do sleep 1; done"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+      - ./django-gunicorn/static:/static
+    env_file:
+      - ./django-gunicorn/.env
+        #command: /bin/bash -c "while true; do sleep 1; done"
 
-  rabbitmq:
-    build: ./mq
-    container_name: mq
-    hostname: my-rabbit
+  nginx:
+    build: ./nginx
+    container_name: nginx
     ports:
-      - 15672:15672
-      - 5672:5672
+      - 80:80
     volumes:
-      - ./volumes/rabbit-data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:15672"]
-      interval: 5s
-      timeout: 15s
-      retries: 5
+      - ./django-gunicorn/static:/static
+    depends_on:
+      - django-gunicorn
+
 

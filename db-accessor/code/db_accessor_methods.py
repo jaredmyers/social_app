@@ -481,7 +481,59 @@ def accessor_methods(body, queue):
         return chat_records
 
     def remove_friend(body):
-        pass
+        '''removes friend from users friendlist'''
+        sessionID = body['sessionID']
+        username = body['friendname']
+
+        # grab current users userID
+        query = "select userID from sessions where sessionID=%s;"
+        val = (sessionID,)
+        cursor = conn.cursor()
+        cursor.execute(query, val)
+        userID1 = cursor.fetchall()[0][0]
+
+        # grab potential friends userID
+        query = "select userID from users where uname=%s;"
+        val = (username,)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # returns false if potential friend doesn't exist
+        if not query_result:
+            return ''
+
+        userID2 = query_result[0][0]
+
+        # return false if user tries to delete self
+        if userID1 == userID2:
+            return ''
+
+        # check if they are already friends & get potential roomID
+        query = "select * from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+        val = (userID1, userID2, userID2, userID1)
+        cursor.execute(query, val)
+        query_result = cursor.fetchall()
+
+        # returns false if not friends
+        if not query_result:
+            return ''
+
+        # delete chat table if exists
+        if query_result[0][2]:
+            roomID = query_result[0][2]
+
+            # delete corresponding chat table
+            query = f"drop table {roomID}"
+            cursor.execute(query)
+            conn.commit()
+
+        # remove friend relationship from friends table
+        query = "delete from friends where userID1=%s and userID2=%s or userID1=%s and userID2=%s;"
+        val = (userID1, userID2, userID2, userID1)
+        cursor.execute(query, val)
+        conn.commit()
+
+        return '0'
 
     def get_recommended(body):
         sessionID = body['sessionID']

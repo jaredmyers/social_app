@@ -69,13 +69,13 @@ def add_friend(sessionID, friendname):
 
 
 def remove_friend(sessionID, friendname):
-    print('remove_friend??')
+    '''sends remove friend signal to mq to take friend of list'''
+
+    print('is this not running?... weird')
     message = {}
     message['type'] = 'remove_friend'
     message['sessionID'] = sessionID
     message['friendname'] = friendname
-
-    print('remove friend sending to db...')
 
     response = send_to_db(message, 'thread_chat_proc')
 
