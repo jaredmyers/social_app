@@ -8,16 +8,6 @@ import chat.credentials as cred
 from chat.send_to_db import send_to_db
 from chat.send_to_api import send_to_api
 
-"""
-conn = mysql.connector.connect(
-        host=cred.db_host,
-        user=cred.db_user,
-        password=cred.db_pw,
-        database=cred.db_database
-        )
-
-"""
-
 
 def get_recommended_friends(sessionID):
     '''gets recommended friends from api based on mutually liked music'''
