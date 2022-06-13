@@ -2,9 +2,6 @@
 # since api was cut from this example
 
 import json
-import os
-import mysql
-import chat.credentials as cred
 from chat.send_to_db import send_to_db
 from chat.send_to_api import send_to_api
 
