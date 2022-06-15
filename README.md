@@ -1,7 +1,7 @@
 # Social App Demo 
 
 ### Concept
-To create a conduit for various social features to be implemented into spotify using their api. This took the form of a web application with the following user features:
+To create a conduit for various social features to be implemented around spotify using their api, with the idea of recommending potential friends to users based on mutually shared music interests and listening habits. This took the form of a web application with the following user features:
 
 * Login
 * Friends list
@@ -9,6 +9,7 @@ To create a conduit for various social features to be implemented into spotify u
 * Forums
 * Friend recommendation system
 * Music statistic viewer
+
 
 Some of the more technical aspects include:
 
@@ -19,11 +20,11 @@ Some of the more technical aspects include:
 * Nginx
 * Django
 * WSGI
-* Docker
+* Docker (for this version)
 
 ### Design
 
-The [original project](https://github.com/jaredmyers/rabbitMQ_proj) was implemented using VMs and had a design looking like:
+The [code for the original project](https://github.com/jaredmyers/rabbitMQ_proj) was implemented using VMs and had a design looking like:
 
 ![VMlayout](images/vm_layout.png)
 
@@ -57,7 +58,7 @@ The original project was also expanded into Dev, QA, and Prod networks with a cu
 
 **Connect**: served to authenticate and grab an API token from spoitify
 
-The api was hallowed out for this demo and these pages are not implemented.
+The api was hallowed out for this demo (only serving preconfigured json) and these pages are not implemented.
 
 ### Database
 ----
@@ -65,7 +66,11 @@ The api was hallowed out for this demo and these pages are not implemented.
 
 A new table is dynamically created when a user initiates a chat. This table stores all chat messages and can be destroyed upon unfriending the chat recipient.
 
+Salting and hash with bcrypt:
+![salt_hash](images/pw_salthash.png)
+
 ### RabbitMQ
+----
 
 All interprocess communcation goes through the MQ, with RPC requests being used where synchronicity is essential.
 
