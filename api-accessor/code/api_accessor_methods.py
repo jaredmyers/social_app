@@ -1,4 +1,5 @@
 import json
+from log_publisher import send_log
 
 
 def accessor_methods(body, queue):
@@ -13,6 +14,7 @@ def accessor_methods(body, queue):
                 "preview": []
                     }
 
+        send_log('got match details, returning..\n')
         return json.dumps(results)
 
     # main entry point

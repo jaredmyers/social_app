@@ -3,6 +3,7 @@
 import uuid
 import pika
 from chat.db_accessor_methods import accessor_methods
+import sys
 
 
 class RpcPublisher():
@@ -52,6 +53,9 @@ class RpcPublisher():
 
 
 class RunSubscriber():
+    """
+    A class for listening for messages from a specific queue
+    """
 
     def __init__(self, user, pw, ip):
         self.credentails = pika.PlainCredentails(user, pw)
@@ -65,6 +69,9 @@ class RunSubscriber():
         self.channel = None
 
     def rpc_subscribe(self, queue):
+        """
+        listens / handles RPC requests
+        """
 
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=queue)
@@ -88,3 +95,94 @@ class RunSubscriber():
         self.channel.basic_consume(queue=queue, on_message_callback=on_request)
         print(" [x] awaiting rpc request..")
         self.channel.start_consuming()
+
+    def listen_fanout(self, exchange, log_path):
+        """
+        listens for all messages coming into a specific exchange
+
+        Parameters
+        ----------
+            exchange : str
+                destination exchange
+        """
+
+        self.channel = self.connection.channel()
+        self.channel.exchange_declare(
+                exchange=exchange,
+                exchange_type='fanout',
+                durable=True,
+                )
+        result = self.channel.queue_declare(queue='', exclusive=True)
+        queue_name = result.method.queue
+
+        self.channel.queue_bind(exchange=exchange, queue=queue_name)
+
+        print("Waiting for logs...")
+
+        def callback(ch, method, properties, body):
+            print("[x] %r" % body)
+            send_log(body)
+
+        def send_log(log_body):
+            with open(log_path, 'ab') as file:
+                file.write(log_body)
+
+        self.channel.basic_consume(
+                queue=queue_name,
+                on_message_callback=callback,
+                auto_ack=True
+                )
+
+        try:
+            self.channel.start_consuming()
+        except KeyboardInterrupt:
+            print('interrupted')
+        sys.exit("exited program")
+
+
+class RunPublisher():
+    """
+    A class for sending messages to a specific queue
+    """
+
+    def __init__(self, user, pw, ip):
+        """
+        Constructs attributes for rabbit connection
+
+        Parameters
+        ----------
+            user : str
+            pw : str
+            ip : str
+        """
+
+        self.credentials = pika.PlainCredentials(user, pw)
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(
+            ip,
+            5672,
+            'socialAppHost',
+            self.credentials)
+        )
+
+    def fan_publish(self, exchange, message):
+        """
+        Sends messages to all queues in specified exchange
+
+        Parameters
+        ----------
+            exchange : str
+                destination queue
+            mesage : str
+                message to be sent
+        """
+
+        self.channel = self.connection.channel()
+        self.channel.exchange_declare(
+                exchange=exchange,
+                exchange_type='fanout',
+                durable=True
+                )
+
+        self.channel.basic_publish(exchange=exchange, routing_key='', body=message)
+        print(" [x] Sent %r" % message)
+        self.connection.close()
