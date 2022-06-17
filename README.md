@@ -64,6 +64,8 @@ The api was hallowed out for this demo (only serving preconfigured json) and the
 ----
 ![schema](images/database_schema.png)
 
+View [socialApp.sql here](htts://github.com/jaredmyers/social_app/blob/master/db/socialApp.sql)
+
 A new table is dynamically created when a user initiates a chat. This table stores all chat messages and can be destroyed upon unfriending the chat recipient.
 
 Salting and hash with bcrypt:
