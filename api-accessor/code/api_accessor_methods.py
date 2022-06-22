@@ -3,7 +3,9 @@ from log_publisher import send_log
 
 
 def accessor_methods(body, queue):
-
+    '''
+    Simulated driver for api queries
+    '''
     def get_details(body):
         '''returns simulated api results'''
         results = {
@@ -14,7 +16,7 @@ def accessor_methods(body, queue):
                 "preview": []
                     }
 
-        send_log('got match details, returning..\n')
+        #send_log('got match details, returning..\n')
         return json.dumps(results)
 
     # main entry point

@@ -54,6 +54,9 @@ class RpcPublisher():
 
 
 class RunSubscriber():
+    """
+    A class to listen for messages on a specific rabbitMQ queue
+    """
 
     def __init__(self, user, pw, ip):
         self.credentails = pika.PlainCredentials(user, pw)

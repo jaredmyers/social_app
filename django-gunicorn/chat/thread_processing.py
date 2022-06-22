@@ -1,10 +1,16 @@
 import json
 from chat.send_to_db import send_to_db
 
+# For communicating with MQ on a given queue
+# for specific functions
+
 
 # thread page processing
 def get_thread_info():
-    '''gets threads from database to display on forum page'''
+    '''
+    sends signal to MQ to retrieve threads
+    from database to display on forum page
+    '''
     message = {}
     message['type'] = 'get_threads'
     print('get_thread_info sending to db...')
@@ -18,7 +24,7 @@ def get_thread_info():
 
 
 def send_new_thread(sessionID, threadname, threadcontent):
-    '''sends info to driver to create new forum thread'''
+    '''sends signal to MQ to create new forum thread'''
 
     message = {}
     message['type'] = 'send_new_thread'
@@ -31,7 +37,10 @@ def send_new_thread(sessionID, threadname, threadcontent):
 
 
 def get_reply_page(threadID):
-    pass
+    '''
+    sends signal to MQ to get replies
+    from database to display for a given thread page
+    '''
     message = {}
     message['type'] = 'get_reply_page'
     message['threadID'] = threadID
@@ -43,7 +52,10 @@ def get_reply_page(threadID):
 
 
 def send_new_reply(sessionID, threadID, replycontent):
-    '''create/send new reply on given threadID to mq for db'''
+    '''
+    sends signal to MQ to create new reply
+    on given threadID
+    '''
     message = {}
     message['type'] = 'send_new_reply'
     message['sessionID'] = sessionID
@@ -55,6 +67,7 @@ def send_new_reply(sessionID, threadID, replycontent):
 
 
 def add_friend(sessionID, friendname):
+    '''sends add signal to mq for adding a new friend'''
     message = {}
     message['type'] = 'add_friend'
     message['sessionID'] = sessionID
@@ -67,7 +80,7 @@ def add_friend(sessionID, friendname):
 
 
 def remove_friend(sessionID, friendname):
-    '''sends remove friend signal to mq to take friend of list'''
+    '''sends remove friend signal to mq to remove friend from friendlist'''
 
     message = {}
     message['type'] = 'remove_friend'
@@ -80,6 +93,10 @@ def remove_friend(sessionID, friendname):
 
 
 def get_friends(sessionID):
+    '''
+    sends signal to MQ for getting users friends
+    from database to display in friendslist
+    '''
     message = {}
     message['type'] = 'get_friends'
     message['sessionID'] = sessionID
@@ -95,6 +112,7 @@ def get_friends(sessionID):
 
 
 def create_chat(sessionID, chat_recipient):
+    '''sends signal to MQ for creating new chat table between friends'''
     message = {}
     message['type'] = 'create_chat'
     message['sessionID'] = sessionID
@@ -106,6 +124,7 @@ def create_chat(sessionID, chat_recipient):
 
 
 def get_username(sessionID):
+    '''sends signal to MQ for getting a users username based on sessionID'''
     message = {}
     message['type'] = 'get_username'
     message['sessionID'] = sessionID
@@ -116,6 +135,7 @@ def get_username(sessionID):
 
 
 def new_chat_message(username, new_message, room_id):
+    '''sends signal to MQ for creating the new chat message in given chat table'''
     message = {}
     message['type'] = 'new_chat_message'
     message['username'] = username
@@ -138,6 +158,7 @@ def new_chat_message(username, new_message, room_id):
 
 
 def get_chat_messages(room_id):
+    '''sends signal to MQ for getting chat messages in a given chatroom'''
     message = {}
     message['type'] = 'get_chat_messages'
     message['room_id'] = room_id
@@ -158,6 +179,10 @@ def get_chat_messages(room_id):
 
 
 class ThreadMain():
+    '''
+    Struct for organizing information for Django parsing
+    within HTML thread(forum) pages
+    '''
 
     def __init__(self, author, threadID, title, content, date):
         self.threadID = threadID
@@ -168,6 +193,10 @@ class ThreadMain():
 
 
 class ThreadReplies():
+    '''
+    Struct for organizing information for Django parsing
+    within HTML reply pages
+    '''
 
     def __init__(self, author, content, date):
         self.author = author

@@ -141,7 +141,7 @@ def home(request):
 
 
 def forum(request):
-
+    '''processes/returns forum page'''
     # validate current session
     session_status = validate_session(request)
     print("session status is:")
@@ -178,6 +178,7 @@ def forum(request):
 
 
 def thread(request, id):
+    '''processes/returns specific thread page with replies'''
 
     # take in and send new reply to database
     if request.method == "POST":
@@ -217,6 +218,7 @@ def thread(request, id):
 
 
 def friendslist(request):
+    '''processes/returns friendlist page'''
 
     # validate current session
     session_status = validate_session(request)
@@ -251,6 +253,7 @@ def friendslist(request):
 
 
 def recommended_details(request, username):
+    '''processes/returns details page on a users match'''
 
     # validate current session
     session_status = validate_session(request)
@@ -272,6 +275,7 @@ def recommended_details(request, username):
 
 
 def chat(request):
+    '''processes/returns chat page'''
 
     # validate current session
     session_status = validate_session(request)
@@ -318,6 +322,7 @@ def chat(request):
 
 
 def chatroom(request, chat_recipient):
+    '''processes/returns page with specific chatroom'''
 
     # validate current session
     session_status = validate_session(request)
@@ -340,6 +345,7 @@ def chatroom(request, chat_recipient):
 
 
 def sendchat(request):
+    '''intermediary for processing chat post request'''
     room_id = request.POST['room_id']
     message = request.POST['message']
     username = request.POST['username']

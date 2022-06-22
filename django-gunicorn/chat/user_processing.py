@@ -1,7 +1,11 @@
 from chat.send_to_db import send_to_db
 
+# For communicating with MQ on given queue
+# for specific functions
+
 
 def process_login(username, password):
+    ''' sends user login credentials to MQ for verification'''
     message = {}
     message["type"] = "login"
     message["username"] = username
@@ -12,6 +16,7 @@ def process_login(username, password):
 
 
 def register_user(username, pw):
+    '''sends new user info to MQ for registration'''
     message = {}
     message["type"] = "register"
     message["username"] = username
@@ -22,6 +27,7 @@ def register_user(username, pw):
 
 
 def check_session(sessionID):
+    '''sends current session to MQ for verification'''
     message = {}
     message["type"] = "check_session"
     message["sessionID"] = sessionID
@@ -31,6 +37,7 @@ def check_session(sessionID):
 
 
 def delete_session(sessionID):
+    '''sends delete signal to MQ to wipe current session info'''
     message = {}
     message["type"] = "delete_session"
     message["sessionID"] = sessionID

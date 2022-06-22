@@ -8,6 +8,9 @@ import json
 
 
 def accessor_methods(body, queue):
+    '''
+    API for accessing mysql
+    '''
 
     conn = mysql.connector.connect(
             host=cred.db_host,
