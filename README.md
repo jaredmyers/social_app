@@ -34,7 +34,27 @@ Here, this layout has been expanded and redesigned for the use of containers:
 
 The original project was also expanded into Dev, QA, and Prod networks with a custom rudimentary deployment server created to track packages across the networks. [This can be found here](https://github.com/jaredmyers/lasthalf_bak), with a [design write up on the package management system here.](https://drive.google.com/file/d/1991pcHl1mj3k-vEqHJIoMChZXfco0spY/view?usp=sharing)
 
+### Database
+----
+![schema](images/database_schema.png)
+
+View [socialApp.sql here](https://github.com/jaredmyers/social_app/blob/master/db/socialApp.sql)
+
+A new table is dynamically created when a user initiates a chat. This table stores all chat messages and can be destroyed upon unfriending the chat recipient.
+
+Salting and hash with bcrypt:
+![salt_hash](images/pw_salthash.png)
+
+### RabbitMQ
+----
+
+All interprocess communcation goes through the MQ, with RPC requests being used where synchronicity is essential.
+
+Three main queues are used, 1 for Spotify API requests and 2 for DB requests. A fanout queue is also optional for potential logs.
+
 ### Frontend
+
+Simple HTML + CSS in Django while using it's templating language to dynamically output data, with this being served by a WSGI(gunicorn) behind Ngnix.
 
 #### Login Page
 ----
@@ -60,21 +80,4 @@ The original project was also expanded into Dev, QA, and Prod networks with a cu
 
 The api was hallowed out for this demo (only serving preconfigured json) and these pages are not implemented.
 
-### Database
-----
-![schema](images/database_schema.png)
-
-View [socialApp.sql here](https://github.com/jaredmyers/social_app/blob/master/db/socialApp.sql)
-
-A new table is dynamically created when a user initiates a chat. This table stores all chat messages and can be destroyed upon unfriending the chat recipient.
-
-Salting and hash with bcrypt:
-![salt_hash](images/pw_salthash.png)
-
-### RabbitMQ
-----
-
-All interprocess communcation goes through the MQ, with RPC requests being used where synchronicity is essential.
-
-Three main queues are used, 1 for Spotify API requests and 2 for DB requests. A fanout queue is also optional for potential logs.
 
