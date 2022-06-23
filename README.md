@@ -23,6 +23,7 @@ Some of the more technical aspects include:
 * Docker (for this version)
 
 ### Design
+----
 
 The [code for the original project](https://github.com/jaredmyers/rabbitMQ_proj) was implemented using VMs and had a design looking like:
 
@@ -53,23 +54,19 @@ All interprocess communcation goes through the MQ, with RPC requests being used 
 Three main queues are used, 1 for Spotify API requests and 2 for DB requests. A fanout queue is also optional for potential logs.
 
 ### Frontend
+----
 
 Simple HTML + CSS in Django while using it's templating language to dynamically output data, with this being served by a WSGI(gunicorn) behind Ngnix.
 
 #### Login Page
-----
 ![login_page](images/login_page.png)
 #### Recommended Friends Page
-----
 ![friends](images/recommended_friends_page.png)
 #### Forum Page
-----
 ![threads](images/threads_page.png)
 #### Forum Replies
-----
 ![threads_reply](images/thread_reply_page.png)
 #### Chat Page
-----
 ![chat](images/chat_page.png)
 
 #### Stats and Connect pages
