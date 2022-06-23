@@ -25,6 +25,7 @@ Some of the more technical aspects include:
 ### Design
 ----
 
+This project was originally implemented using virtual machines on a local network using the following design:
 The [code for the original project](https://github.com/jaredmyers/rabbitMQ_proj) was implemented using VMs and had a design looking like:
 
 ![VMlayout](images/vm_layout.png)
